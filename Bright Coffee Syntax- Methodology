@@ -1,0 +1,90 @@
+---Syntax to view table columns and check if all data has been loaded correctly.
+Select * from coffeeshopsales
+limit 10;
+
+---first code with errors.
+select transaction_date, to_char (to_date(transaction_date,'dd/mm/yyyy')), 
+'yyyymm' as month_id,
+count(transaction_id) as number_of_sales,
+count(product_id) as unique_Products_sold,
+sum (tranaction_qty * to_number(replace(unitprice,',',','))) total_amount,
+product_category,product_detail,store_location,
+CASE
+WHEN TRANSACTION_TIME between '06:00:00' and '11:59:59' then 'morning',
+WHEN TRANSACTION_TIME between '12:00:00' and '16:59:59' then 'Afternoon',
+WHEN TRANSACTION_TIME between '17:00:00' and '19:59:59' then 'Evening',
+else 'night'
+end as timeBuckets
+from coffeeshopsales
+group by all
+order by transaction_date Asc;
+
+--- Running code, with Month_id column returned as yyyymm instead of the string. ERROR
+SELECT 
+  transaction_date,
+  TO_CHAR(TO_DATE(transaction_date, 'dd/mm/yyyy'), 'yyyy-mm-dd') AS formatted_date,
+  TO_CHAR(TO_DATE(transaction_date, 'dd/mm/yyyy'), 'yyyymm') AS month_id,
+  COUNT(transaction_id) AS number_of_sales,
+  COUNT(product_id) AS unique_products_sold,
+  SUM(TRY_TO_NUMBER(transaction_qty) * TRY_TO_NUMBER(REPLACE(unit_price, ',', ''))) AS total_amount,
+  product_category,
+  product_detail,
+  store_location,
+  CASE
+    WHEN TO_TIME(transaction_time) BETWEEN '06:00:00' AND '11:59:59' THEN 'morning'
+    WHEN TO_TIME(transaction_time) BETWEEN '12:00:00' AND '16:59:59' THEN 'Afternoon'
+    WHEN TO_TIME(transaction_time) BETWEEN '17:00:00' AND '19:59:59' THEN 'Evening'
+    ELSE 'night'
+  END AS time_buckets
+FROM 
+  coffeeshopsales
+GROUP BY 
+  transaction_date,
+  product_category,
+  product_detail,
+  store_location,
+  TO_CHAR(TO_DATE(transaction_date, 'dd/mm/yyyy'), 'yyyy-mm-dd'),
+  TO_CHAR(TO_DATE(transaction_date, 'dd/mm/yyyy'), 'yyyymm'),
+  CASE
+    WHEN TO_TIME(transaction_time) BETWEEN '06:00:00' AND '11:59:59' THEN 'morning'
+    WHEN TO_TIME(transaction_time) BETWEEN '12:00:00' AND '16:59:59' THEN 'Afternoon'
+    WHEN TO_TIME(transaction_time) BETWEEN '17:00:00' AND '19:59:59' THEN 'Evening'
+    ELSE 'night'
+  END
+ORDER BY 
+  transaction_date ASC;
+
+--- Final code with extra columns, changed data formats and filters applied.
+  SELECT 
+  transaction_date,
+  TO_CHAR(TO_DATE(transaction_date, 'dd/mm/yyyy'), 'yyyy-mm-dd') AS formatted_date,
+  TO_CHAR(TO_DATE(transaction_date, 'dd/mm/yyyy'), 'yyyymm') AS month_id,
+  COUNT(transaction_id) AS number_of_sales,
+  COUNT(product_id) AS unique_products_sold,
+  SUM(TRY_TO_NUMBER(transaction_qty) * TRY_TO_NUMBER(REPLACE(unit_price, ',', ''))) AS total_amount,
+  product_category,
+  product_detail,
+  store_location,
+CASE
+    WHEN TO_TIME(transaction_time) BETWEEN '06:00:00' AND '11:59:59' THEN 'morning'
+    WHEN TO_TIME(transaction_time) BETWEEN '12:00:00' AND '16:59:59' THEN 'Afternoon'
+    WHEN TO_TIME(transaction_time) BETWEEN '17:00:00' AND '19:59:59' THEN 'Evening'
+    ELSE 'night'
+  END AS time_buckets
+FROM 
+  coffeeshopsales
+GROUP BY 
+  transaction_date,
+  product_category,
+  product_detail,
+  store_location,
+  TO_CHAR(TO_DATE(transaction_date, 'dd/mm/yyyy'), 'yyyy-mm-dd'),
+  TO_CHAR(TO_DATE(transaction_date, 'dd/mm/yyyy'), 'yyyymm'),
+CASE
+    WHEN TO_TIME(transaction_time) BETWEEN '06:00:00' AND '11:59:59' THEN 'morning'
+    WHEN TO_TIME(transaction_time) BETWEEN '12:00:00' AND '16:59:59' THEN 'Afternoon'
+    WHEN TO_TIME(transaction_time) BETWEEN '17:00:00' AND '19:59:59' THEN 'Evening'
+    ELSE 'night'
+  END
+ORDER BY 
+  transaction_date ASC;
